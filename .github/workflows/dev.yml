@@ -1,0 +1,19 @@
+name: 'API Gateway Deploy'
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  api-gateway-provide:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: validate
+        run: echo 'terraform validate'
+
+      - name: plan
+        run: echo 'terraform plan'
+
+      - name: apply
+        run: echo 'terraform apply'
