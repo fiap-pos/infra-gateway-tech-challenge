@@ -1,0 +1,46 @@
+name: "Infra CI"
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - develop
+      - main
+    paths:
+      - "**.tf"
+      - "**.tfvars"
+
+jobs:
+  terraform-files-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Set up terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.1
+
+      - name: Init
+        run: terraform init
+        working-directory: "./infra"
+
+      - name: Validate
+        run: terraform validate
+        working-directory: "./infra"
+
+      - name: Plan
+        run: terraform plan
+        working-directory: "./infra"
+
+      - name: Apply
+        run: terraform apply -auto-approve
+        working-directory: "./infra"
