@@ -1,14 +1,13 @@
-name: "Infra CI"
+name: "Deploy infra"
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  push:
     branches:
-      - develop
       - main
     paths:
       - "**.tf"
       - "**.tfvars"
+  workflow_dispatch:
 
 jobs:
   terraform-files-check:
@@ -31,16 +30,16 @@ jobs:
 
       - name: Init
         run: terraform init
-        working-directory: "./infra"
+        working-directory: "./"
 
       - name: Validate
         run: terraform validate
-        working-directory: "./infra"
+        working-directory: "./"
 
       - name: Plan
         run: terraform plan
-        working-directory: "./infra"
+        working-directory: "./"
 
       - name: Apply
         run: terraform apply -auto-approve
-        working-directory: "./infra"
+        working-directory: "./"

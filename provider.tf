@@ -11,8 +11,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "tech-challenge-61"
-    key    = "infra-gateway-tech-challenge/gw.tfstate"
+    bucket = "vwnunes-tech-challenge-61"
+    key    = "infra-eks-tech-challenge/gw.tfstate"
     region = "us-east-1"
   }
 
