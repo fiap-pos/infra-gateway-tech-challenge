@@ -6,6 +6,12 @@ data "aws_lb" "auth_lb" {
   name = var.auth_nlb_name
 }
 
+data "aws_lambda_function" "lambda_authorizer" {
+  function_name = var.lambda_authorizer_name
+}
+
+# API Gateway Configuration
+
 resource "aws_api_gateway_rest_api" "tech_challenge_gw" {
   name = "tech-challenge-api-gateway"
 
@@ -14,6 +20,53 @@ resource "aws_api_gateway_rest_api" "tech_challenge_gw" {
   }
 }
 
+# Lambda Authorizer Configuration
+
+data "aws_iam_policy_document" "invocation_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["apigateway.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "invocation_role" {
+  name               = "api_gateway_auth_invocation"
+  path               = "/"
+  assume_role_policy = data.aws_iam_policy_document.invocation_assume_role.json
+}
+
+data "aws_iam_policy_document" "invocation_policy" {
+  statement {
+    effect    = "Allow"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [data.aws_lambda_function.lambda_authorizer.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "invocation_policy" {
+  name   = "default"
+  role   = aws_iam_role.invocation_role.id
+  policy = data.aws_iam_policy_document.invocation_policy.json
+}
+
+
+resource "aws_api_gateway_authorizer" "tech_challenge_authorizer" {
+  name                   = "tech-challenge-authorizer"
+  rest_api_id            = aws_api_gateway_rest_api.tech_challenge_gw.id
+  
+  authorizer_uri         = data.aws_lambda_function.lambda_authorizer.invoke_arn
+  authorizer_credentials = aws_iam_role.invocation_role.arn
+  authorizer_result_ttl_in_seconds = 0
+
+  type                   = "TOKEN"
+  identity_source        = "method.request.header.Authorization"
+}
 
 # VPC links
 
@@ -67,8 +120,6 @@ resource "aws_api_gateway_integration" "auth_integration" {
   integration_http_method = "ANY"
   uri                     = "http://${data.aws_lb.auth_lb.dns_name}/{proxy}"
 
-  cache_key_parameters = ["method.request.path.proxy"]
-
   timeout_milliseconds = 29000
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
@@ -102,7 +153,10 @@ resource "aws_api_gateway_method" "lanchonete_any"  {
   rest_api_id   = aws_api_gateway_rest_api.tech_challenge_gw.id
   resource_id   = aws_api_gateway_resource.lanchonete_proxy.id
   http_method   = "ANY"
-  authorization = "NONE"
+
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.tech_challenge_authorizer.id
+
   request_parameters = {
     "method.request.path.proxy" = true
   }
@@ -119,8 +173,6 @@ resource "aws_api_gateway_integration" "lanchonete_integration" {
   type                    = "HTTP_PROXY"  
   integration_http_method = "ANY"
   uri                     = "http://${data.aws_lb.lanchonete_lb.dns_name}/{proxy}"
-
-  cache_key_parameters = ["method.request.path.proxy"]
 
   timeout_milliseconds = 29000
   request_parameters = {
