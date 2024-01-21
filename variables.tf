@@ -13,9 +13,13 @@ variable "lanchonete_nlb_name" {
   default = "nlb-lanchonete-service"
 }
 
+variable "producao_nlb_name" {
+  type    = string
+  default = "nlb-producao-service"
+}
+
 variable "lambda_authorizer_name" {
   type        = string
   description = "Name of the Lambda Authorizer function"
   default     = "techChallengeLambdaAuthorizerFunction"
 }
-
