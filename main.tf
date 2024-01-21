@@ -15,7 +15,7 @@ data "aws_lambda_function" "lambda_authorizer" {
   function_name = var.lambda_authorizer_name
 }
 
-# API Gateway Configuration
+#---  API Gateway Configuration ---
 
 resource "aws_api_gateway_rest_api" "tech_challenge_gw" {
   name = "tech-challenge-api-gateway"
@@ -25,7 +25,7 @@ resource "aws_api_gateway_rest_api" "tech_challenge_gw" {
   }
 }
 
-# Lambda Authorizer Configuration
+#--- Lambda Authorizer Configuration ---
 
 data "aws_iam_policy_document" "invocation_assume_role" {
   statement {
