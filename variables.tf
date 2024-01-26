@@ -18,6 +18,11 @@ variable "producao_nlb_name" {
   default = "nlb-producao-service"
 }
 
+variable "pagamentos_nlb_name" {
+  type    = string
+  default = "nlb-pagamentos-service"
+}
+
 variable "lambda_authorizer_name" {
   type        = string
   description = "Name of the Lambda Authorizer function"
