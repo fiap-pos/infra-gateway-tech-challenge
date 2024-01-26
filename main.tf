@@ -58,7 +58,7 @@ module "pagamentos_api" {
   api_gateway_root_resource_id = aws_api_gateway_rest_api.tech_challenge_gw.root_resource_id
   authorizer_id = module.authorizer.lambda_authorizer_id
   pagamentos_nlb_name = var.pagamentos_nlb_name
-  depends_on = [ moddule.auhtorizer ]
+  depends_on = [ module.authorizer ]
 }
 
 #---- Api Gateway Deployment ----

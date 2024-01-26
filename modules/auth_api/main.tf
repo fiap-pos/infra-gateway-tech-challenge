@@ -15,8 +15,6 @@ resource "aws_api_gateway_resource" "auth_resource" {
   rest_api_id = var.api_gateway_id
   parent_id   = var.api_gateway_root_resource_id
   path_part   = "auth"
-
-  depends_on = [ aws_api_gateway_rest_api.tech_challenge_gw ]
 }
 
 resource "aws_api_gateway_resource" "auth_proxy" {
